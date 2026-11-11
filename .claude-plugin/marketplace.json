@@ -1,0 +1,14 @@
+{
+  "name": "agentlens-skills",
+  "owner": {
+    "name": "Linnify",
+    "url": "https://linnify.com"
+  },
+  "plugins": [
+    {
+      "name": "agentlens",
+      "source": "./",
+      "description": "Integrate AgentLens: send traces and scores with the AgentLens SDKs, and improve the agent from reviewer feedback."
+    }
+  ]
+}

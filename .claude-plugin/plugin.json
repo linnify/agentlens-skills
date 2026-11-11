@@ -1,0 +1,13 @@
+{
+  "name": "agentlens",
+  "description": "Skills for integrating AgentLens, the platform where domain experts review AI agent traces: send traces and scores with the AgentLens SDKs, and improve the agent from reviewer feedback.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Linnify",
+    "url": "https://linnify.com"
+  },
+  "homepage": "https://agentlens.linnify.com",
+  "repository": "https://github.com/linnify/agentlens-skills",
+  "license": "MIT",
+  "keywords": ["agentlens", "llm", "agents", "observability", "tracing", "evaluation", "human-review"]
+}
