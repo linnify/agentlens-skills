@@ -111,6 +111,9 @@ When no trace arrives, read the app's logs:
 | --- | --- |
 | `[AgentLens] Missing API key; traces will not be sent` | Load `AGENTLENS_API_KEY` before the SDK is constructed |
 | `[AgentLens] Sending N span(s) failed: HTTP 401` | The key is wrong or was deleted |
+| `[AgentLens] https://api.agentlens.linnify.com no longer accepts traces; sending to https://agentlens.linnify.com instead` | Remove the old address from `AGENTLENS_BASE_URL`, or set it to `https://agentlens.linnify.com` |
+| `[AgentLens] The base URL … ends in /v1` (or `/api`) | Set `AGENTLENS_BASE_URL` to the web app's address alone; the SDK adds `/api/v1` |
+| `[AgentLens] Sending N span(s) failed: HTTP 404 (… is not an AgentLens endpoint …)` or `HTTP 301 (AgentLens answered with a redirect …)` | `AGENTLENS_BASE_URL` is not the AgentLens web app's address (an old api address or port, or `http://` for an `https://` host) |
 | `[AgentLens] Span "…" has no agent and was dropped` | Pass `agent` to the SDK, or set it per trace |
 | `[AgentLens] N span(s) were rejected: …` | The slug doesn't match an agent of the organization, or the trace names an experiment or evaluation that isn't that agent's |
 | Nothing | `AGENTLENS_ENABLED` is off, or the process exited before flushing |
