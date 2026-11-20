@@ -73,13 +73,13 @@ Traces of experiments and evaluations stay out of the normal trace lists; they a
 | Variable | |
 | --- | --- |
 | `AGENTLENS_API_KEY` | Required. Without it the SDK sends nothing and logs a warning. |
-| `AGENTLENS_BASE_URL` | Defaults to `https://api.agentlens.linnify.com`. Set it only to target another AgentLens environment. |
+| `AGENTLENS_BASE_URL` | The AgentLens web app's address. Defaults to `https://agentlens.linnify.com`; set it only for another AgentLens, such as a local one (`http://localhost:3000`). The SDK adds `/api/v1` itself, so never end it in `/api` or `/v1`. The old api address, `https://api.agentlens.linnify.com`, no longer accepts traces: remove it wherever a project still sets it. |
 | `AGENTLENS_ENABLED` | `false`, `0`, `no` or `off` turns the SDK off without a warning: tests, CI, local runs. |
 | `AGENTLENS_ENVIRONMENT` | The traces' environment, read by the Mastra, LangChain and pi packages. |
 
 ## SDK rules
 
-- Install the latest release and keep every `@linnify/agentlens-*` package on the same version: they are released together.
+- Install the latest release and keep every `@linnify/agentlens-*` package on the same version: they are released together. Releases before 0.9.0 send to the retired api address and reach nothing: upgrade a project that pins one.
 - For an option this skill doesn't show, read the package's README for its current release: `https://unpkg.com/@linnify/agentlens-<package>/README.md`.
 - A change is done when its trace or score shows up in AgentLens, not when it compiles.
 
@@ -116,9 +116,9 @@ Every tool but the first two takes the agent's slug as `agent`.
 
 Tools that write change what the whole team sees. Confirm with the user before `save_agent` (a new slug sends new traces elsewhere), `start_evaluation`, `create_version`, `decide_evaluation_result`, `send_evaluation_result_to_expert`, the three Dataset item tools and `delete_experiment`. `create_experiment`, `update_experiment` and `set_trace_topic` are part of the tasks that use them.
 
-Without the MCP server, the API returns an agent's latest traces with the API key:
+Without the MCP server, AgentLens returns an agent's latest traces with the API key:
 
 ```bash
 curl -s -H "Authorization: Bearer $AGENTLENS_API_KEY" \
-  "${AGENTLENS_BASE_URL:-https://api.agentlens.linnify.com}/v1/traces?agent=<slug>&limit=5"
+  "${AGENTLENS_BASE_URL:-https://agentlens.linnify.com}/api/v1/agents/<slug>/traces?limit=5"
 ```
