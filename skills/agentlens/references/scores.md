@@ -34,6 +34,7 @@ agentLensExporter.client?.score.create({
 | `dataType` | Inferred from `value`. Set `'TEXT'` for free text, or a string is sent as a category |
 | `id` | Sending the same id again updates the score instead of adding one: use it when a user can change their vote |
 | `agent` | Defaults to the client's. A trace sent to another agent needs that agent here too |
+| `experimentId`, `evaluationId` | For a score on the trace of an experiment or evaluation run: it keeps the score with its run. `item.score()` and `result.score()` set it for you ([Experiments](experiments.md), [Evaluations](evaluations.md)) |
 | `comment`, `source`, `metadata`, `timestamp` | `source` (`user`, `judge`, `ci`…) shows as a badge next to the score |
 
 | Value | Type | In AgentLens |

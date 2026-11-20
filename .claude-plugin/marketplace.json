@@ -8,7 +8,7 @@
     {
       "name": "agentlens",
       "source": "./",
-      "description": "Integrate AgentLens: send traces and scores with the AgentLens SDKs, and improve the agent from reviewer feedback."
+      "description": "Integrate AgentLens: send traces and scores with the AgentLens SDKs, improve the agent from reviewer feedback, and check each change with experiments and evaluations."
     }
   ]
 }

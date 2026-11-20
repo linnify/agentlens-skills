@@ -85,6 +85,10 @@ Every span the provider starts is sent. AgentLens reads only the `agentlens.*` a
 - To send a trace to another agent, start its root span inside `withAgent('billing_bot', () => tracer.startActiveSpan(…))`. A root started outside it, such as an HTTP server span, keeps the default agent and the trace splits in two.
 - Short-lived processes: `await provider.forceFlush()` before exiting.
 
+## Runs of an experiment or an evaluation
+
+A run started by a dataset script or an evaluation harness carries the id of its experiment or evaluation, which keeps its trace out of the normal lists and with its run. How each package takes that id is in [Experiments](experiments.md) and [Evaluations](evaluations.md).
+
 ## What reviewers read
 
 The trace's input and output come from its root. Make them the user's message and the agent's answer, not the request object or the whole graph state. A list of `{ role, content }` messages, with tool calls, shows as a conversation; any other value shows as JSON. The Mastra and LangChain packages do this already.
@@ -108,5 +112,5 @@ When no trace arrives, read the app's logs:
 | `[AgentLens] Missing API key; traces will not be sent` | Load `AGENTLENS_API_KEY` before the SDK is constructed |
 | `[AgentLens] Sending N span(s) failed: HTTP 401` | The key is wrong or was deleted |
 | `[AgentLens] Span "…" has no agent and was dropped` | Pass `agent` to the SDK, or set it per trace |
-| `[AgentLens] N span(s) were rejected: …` | The slug doesn't match an agent of the organization |
+| `[AgentLens] N span(s) were rejected: …` | The slug doesn't match an agent of the organization, or the trace names an experiment or evaluation that isn't that agent's |
 | Nothing | `AGENTLENS_ENABLED` is off, or the process exited before flushing |

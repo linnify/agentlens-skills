@@ -9,6 +9,9 @@ Skills that teach coding agents (Claude Code, Cursor, Codex and others) to conne
 | Integration | Add the AgentLens SDK to a Mastra, LangChain/LangGraph, pi or OpenTelemetry agent, then run it and check the trace in AgentLens |
 | Scores | Send 👍/👎 feedback, ratings and automated checks on traces |
 | Reviews | Read what reviewers said about the agent, find the causes and fix them |
+| Topics | File the traces that have no topic under the topics your team defined |
+| Experiments | Try a change to the agent against your own dataset and compare it with the run before |
+| Evaluations | Build the agent's evaluation harness, run a version on the Dataset your experts reviewed, and judge the results |
 | Privacy | Keep secrets and personal data out of traces, delete a user's or tenant's traces, set retention |
 
 ## Install
@@ -30,7 +33,7 @@ As a Claude Code plugin:
 
 - **An API key.** An owner of your AgentLens organization creates one under **Settings → API Keys**. It serves every agent of the organization. Set it as `AGENTLENS_API_KEY`.
 - **An agent.** Create it under **Settings → Agents**. Its slug (`support_bot`) is how your code names it.
-- **The MCP server**, so your coding agent can read traces and reviews: `https://agentlens.linnify.com/api/mcp`, with the API key as a bearer token. The skill shows how to connect it.
+- **The MCP server**, so your coding agent can read traces and reviews and run experiments and evaluations: `https://agentlens.linnify.com/api/mcp`. You sign in to it with your AgentLens account, and the coding agent works with your role. The skill shows how to connect it.
 
 ## Contributing
 

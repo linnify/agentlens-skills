@@ -1,10 +1,10 @@
 ---
 name: agentlens
 description: >-
-  Connect an AI agent to AgentLens and work with its data. Use when adding the AgentLens SDK (@linnify/agentlens-mastra, -langchain, -otel, -client, -pi) to an agent, sending scores such as 👍/👎 user feedback or automated checks, reading an agent's traces and reviews through the AgentLens MCP server to fix what reviewers flagged, or deleting an end user's traces. Use it whenever a task mentions AgentLens, its SDK, its API key or its reviews.
+  Connect an AI agent to AgentLens and work with its data. Use when adding the AgentLens SDK (@linnify/agentlens-mastra, -langchain, -otel, -client, -pi) to an agent, sending scores such as 👍/👎 user feedback or automated checks, reading an agent's traces and reviews through the AgentLens MCP server to fix what reviewers flagged, filing traces under topics, trying a change to the agent against a local dataset as an experiment, building or running an evaluation harness and judging its results, or deleting an end user's traces. Use it whenever a task mentions AgentLens, its SDK, its API key, its reviews, its experiments or its evaluations.
 allowed-tools:
   - WebFetch(domain:unpkg.com)
-  - mcp__agentlens__get_organization
+  - mcp__agentlens__list_organizations
   - mcp__agentlens__list_agents
   - mcp__agentlens__get_agent
   - mcp__agentlens__list_traces
@@ -12,11 +12,22 @@ allowed-tools:
   - mcp__agentlens__get_observation
   - mcp__agentlens__list_reviews
   - mcp__agentlens__get_review
+  - mcp__agentlens__list_topics
+  - mcp__agentlens__list_versions
+  - mcp__agentlens__list_dataset_items
+  - mcp__agentlens__get_dataset_item
+  - mcp__agentlens__list_evaluations
+  - mcp__agentlens__get_evaluation
+  - mcp__agentlens__get_evaluation_result
+  - mcp__agentlens__list_experiments
+  - mcp__agentlens__get_experiment
+  - mcp__agentlens__list_experiment_items
+  - mcp__agentlens__compare_experiments
 ---
 
 # AgentLens
 
-AgentLens is where domain experts review what an AI agent does. The agent sends its traces; experts review them and comment right on the output; each reviewed trace becomes an example in the agent's dataset; builders improve the agent and the next traces are reviewed again.
+AgentLens is where domain experts review what an AI agent does. The agent sends its traces; experts review them and comment right on the output; each reviewed trace becomes an item in the agent's Dataset; builders improve the agent, check the change against that Dataset with an evaluation, and the next traces are reviewed again.
 
 ## How AgentLens is organized
 
@@ -32,7 +43,14 @@ AgentLens is where domain experts review what an AI agent does. The agent sends 
 | Tenant | The customer or workspace a trace ran for. With **Multi-tenant** on, each trace shows its tenant, with a filter and usage per tenant. |
 | Environment | Where the trace was sent from: `production`, `staging`… |
 | Score | A named value on a trace or one of its steps: user feedback, an automated check. |
+| Topic | A kind of request the agent handles, with rules that say what belongs to it. A trace is filed under one topic or none. |
 | Review | An expert's feedback on one trace: comment threads on the output, then a decision: **Approved**, **Needs improvement** or **Drop**. |
+| Dataset item | A reviewed trace kept as a case: **Approved** when its output is the expected answer, **Open** when the review flagged its output, **Dropped** when it no longer runs. |
+| Version | A named state of the agent (`v1.1`) with a note on what changed. Its configuration lives in the agent's repository, not in AgentLens. |
+| Evaluation | One run of a version on the Dataset, executed by the agent's own **harness**. An approved item passes when the new answer is the same as the expected one, an open item when the new answer fixes what the review flagged. |
+| Experiment | One run of the project's own local dataset against a change to the agent, started from a script. Each case is an item with its input, context, trace and scores. |
+
+Traces of experiments and evaluations stay out of the normal trace lists; they are reached through their experiment or evaluation.
 
 ## Connecting an agent
 
@@ -45,6 +63,9 @@ AgentLens is where domain experts review what an AI agent does. The agent sends 
 - [Integration](references/integration.md): adding the SDK to a Mastra, LangChain/LangGraph, pi or OpenTelemetry agent, and checking its traces in AgentLens.
 - [Scores](references/scores.md): user feedback and automated checks on traces.
 - [Reviews](references/reviews.md): reading what reviewers said and fixing the agent.
+- [Topics](references/topics.md): filing traces that have no topic.
+- [Experiments](references/experiments.md): trying a change to the agent against the project's local dataset and comparing it with the run before.
+- [Evaluations](references/evaluations.md): building the agent's evaluation harness, running a version on the Dataset, judging the results the harness left undecided.
 - [Privacy](references/privacy.md): masking data, deleting a user's or tenant's traces, retention.
 
 ## Environment variables
@@ -64,32 +85,38 @@ AgentLens is where domain experts review what an AI agent does. The agent sends 
 
 ## AgentLens MCP server
 
-AgentLens serves an MCP server at `https://agentlens.linnify.com/api/mcp` (Streamable HTTP), authenticated with the organization's API key as a bearer token. When it isn't connected, offer to connect it. For Claude Code, in the project's `.mcp.json` (the key stays in the environment, so the file can be committed):
+AgentLens serves an MCP server at `https://agentlens.linnify.com/api/mcp` (Streamable HTTP). It signs the user in with OAuth, and you then act as that user: you see the agents they can open, with their role on each. When it isn't connected, offer to connect it. For Claude Code:
 
-```json
-{
-  "mcpServers": {
-    "agentlens": {
-      "type": "http",
-      "url": "https://agentlens.linnify.com/api/mcp",
-      "headers": { "Authorization": "Bearer ${AGENTLENS_API_KEY}" }
-    }
-  }
-}
+```bash
+claude mcp add --transport http --scope user agentlens https://agentlens.linnify.com/api/mcp
 ```
 
-Other clients take the same URL and header, with their own environment-variable syntax.
+The user then runs `/mcp`, picks `agentlens` and chooses **Authenticate**. When their browser is on another machine than Claude Code, `claude mcp login agentlens --no-browser` prints the sign-in link and takes the redirect URL back. Other clients add the same URL as a remote HTTP server.
 
-| Tool | Returns |
+A tool refuses what the user's role cannot do in the web app, with the role it needs:
+
+| Role | Can |
 | --- | --- |
-| `get_organization` | The organization, its members (their emails filter reviews by assignee) and its agent count |
-| `list_agents`, `get_agent` | Agents with their slugs and settings. Every other tool takes the slug as `agent` |
-| `list_traces` | An agent's traces, newest first, filtered by date, `sessionId`, `userId`, `environment`, `tenant` or `hasError` |
-| `get_trace`, `get_observation` | One trace with its steps, scores and review; one step's full payload |
-| `list_reviews`, `get_review` | Reviews by status and assignee; one review with its comment threads |
-| `save_agent` | Creates or updates an agent. It writes, and a new slug sends new traces elsewhere: confirm with the user first |
+| Expert | Read reviews |
+| Builder | Everything an Expert can, plus traces, topics, the Dataset, versions, evaluations and experiments |
+| Owner | Everything a Builder can, plus deciding evaluation results, moving Dataset items, and an agent's slug, retention and harness URL |
 
-Without the MCP server, the API returns an agent's latest traces with the same key:
+Every tool but the first two takes the agent's slug as `agent`.
+
+| Tools | For |
+| --- | --- |
+| `list_agents`, `list_organizations`, `get_agent` | The agents the user can open with their slugs, settings and members (their emails filter reviews by assignee) |
+| `list_traces` | An agent's traces, newest first, filtered by date, `name`, `sessionId`, `userId`, `environment`, `tenant`, `hasError`, `topic` (an id, or `"none"`) or a score |
+| `get_trace`, `get_observation` | One trace with its steps, topic, scores and review; one step's full payload |
+| `list_reviews`, `get_review` | Reviews by status and assignee; one review with its comment threads |
+| `list_topics`, `set_trace_topic` | [Topics](references/topics.md) |
+| `create_experiment`, `update_experiment`, `list_experiments`, `get_experiment`, `list_experiment_items`, `compare_experiments`, `delete_experiment` | [Experiments](references/experiments.md) |
+| `list_versions`, `create_version`, `list_dataset_items`, `get_dataset_item`, `list_evaluations`, `get_evaluation`, `get_evaluation_result`, `start_evaluation`, `decide_evaluation_result`, `send_evaluation_result_to_expert`, `approve_dataset_item`, `reopen_dataset_item`, `drop_dataset_items` | [Evaluations](references/evaluations.md) |
+| `save_agent` | Creates or updates an agent, including its harness URL |
+
+Tools that write change what the whole team sees. Confirm with the user before `save_agent` (a new slug sends new traces elsewhere), `start_evaluation`, `create_version`, `decide_evaluation_result`, `send_evaluation_result_to_expert`, the three Dataset item tools and `delete_experiment`. `create_experiment`, `update_experiment` and `set_trace_topic` are part of the tasks that use them.
+
+Without the MCP server, the API returns an agent's latest traces with the API key:
 
 ```bash
 curl -s -H "Authorization: Bearer $AGENTLENS_API_KEY" \
