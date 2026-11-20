@@ -44,7 +44,7 @@ await client.shutdown(); // sends the items, then the scores
 | `input` | Required, any JSON value |
 | `context` | An object of key/value pairs the case ran with: tenant, plan, the signed-in customer |
 | `expected` | What a good answer is, any JSON value |
-| `traceId` | The trace this run will have. When the framework picks it, leave it out and call `item.setTrace(traceId)` after the run |
+| `traceId` | The trace this run will have, always a new one. When the framework picks it, leave it out and call `item.setTrace(traceId)` after the run |
 
 - `item.fail(error)` records a run that threw. `item.score()` takes the same values as `score.create()` ([Scores](scores.md)) and needs the item's trace.
 - Give every case one BOOLEAN score that says whether it passed. A comparison counts a case as fixed or regressed only when a BOOLEAN score flips or a run starts or stops failing.
@@ -75,4 +75,4 @@ A model does not answer the same way twice. Before calling a case fixed or regre
 
 ## Check it in AgentLens
 
-After a run, `get_experiment` shows as many items as the dataset has cases (times the trials), each with a trace; `list_experiment_items` with `failed: true` lists the runs that threw. `list_traces` for the agent shows none of the run's traces. An item AgentLens refuses (an experiment the organization doesn't have, a trace that already belongs to another item) is logged as `[AgentLens] Experiment item "<key>" (trial <n>) of experiment <id> was rejected: <reason>`.
+After a run, `get_experiment` shows as many items as the dataset has cases (times the trials), each with a trace; `list_experiment_items` with `failed: true` lists the runs that threw. `list_traces` for the agent shows none of the run's traces. An item AgentLens refuses (an experiment the organization doesn't have, a trace that already belongs to another item, a reviewed trace or a Dataset item's trace) is logged as `[AgentLens] Experiment item "<key>" (trial <n>) of experiment <id> was rejected: <reason>`.

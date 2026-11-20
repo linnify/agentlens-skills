@@ -40,9 +40,9 @@ export const runEvaluation = async (evaluationId: string) => {
         tracingOptions: { traceId: result.traceId, metadata: { ...run.metadata } },
       });
       if (item.expected) {
-        const same = await sameAnswer(item.expected.outputText, answer.text);
+        const same = await sameAnswer(item.expected.outputText, answer.text); // 'same', 'different' or 'unsure'
         result.score({ name: 'same_answer', value: same.verdict, comment: same.reason });
-        result.decide(same.verdict ? 'PASSED' : 'FAILED');
+        if (same.verdict !== 'unsure') result.decide(same.verdict === 'same' ? 'PASSED' : 'FAILED');
       } else {
         const fixed = await feedbackAddressed(item.feedback, answer.text);
         result.score({ name: 'feedback_addressed', value: fixed.verdict, comment: fixed.reason });
@@ -67,12 +67,13 @@ app.post('/agentlens/evaluations', async (req, res) => {
 - **A version is configuration in the repository.** `run.version` is the version's name in AgentLens. Map it to a saved copy of the agent's model, effort, instructions and skills (a folder per version, a tag or a commit), never to whatever is checked out. Fail the run with `run.fail()` when the version is unknown.
 - **Each item carries what the run needs:** `itemId`, `status` (`APPROVED` or `OPEN`), `topic`, the `context` it ran in (`tenant`, `userId`, `sessionId`, `environment`, `metadata`), the conversation `history` before it, its `input` and `inputText`, and either `expected` (the approved `output`, `outputText` and the `tools` it called) or `feedback` (the reviewed `output`, the review's `threads` and the `failedCriteria`). It is frozen when the evaluation is created.
 - **Run the item as the original ran:** the same tenant and user, the history replayed, on a new session, so that the first run's memory does not leak in.
-- **The trace must carry the evaluation's id**, or it shows up among the live traces: `{ ...run.metadata }` in Mastra's `tracingOptions.metadata` or LangChain's run `metadata`, `withEvaluation(run.id, () => …)` in OpenTelemetry, `AGENTLENS_EVALUATION_ID` for pi. `run.result(item)` fixes the trace id before the run; `result.setTrace(traceId)` moves it when the framework picks the id.
+- **The trace must carry the evaluation's id:** `{ ...run.metadata }` in Mastra's `tracingOptions.metadata` or LangChain's run `metadata`, `withEvaluation(run.id, () => …)` in OpenTelemetry, `AGENTLENS_EVALUATION_ID` for pi. The result's report also marks its trace as the evaluation's, so the id on the spans is what keeps the trace out of the live traces when the report never arrives. `run.result(item)` fixes the trace id before the run; `result.setTrace(traceId)` moves it when the framework picks the id.
+- **The run's trace is a new one.** Never pass `item.itemId`, `expected.traceId` or `feedback.traceId` as the run's trace id: AgentLens refuses a report, spans and scores that name a reviewed trace or a Dataset item's trace, with "A run cannot take a reviewed trace or a Dataset item's trace; use the trace id of the run itself".
 - **Decide approved items only when the check is reliable.** Compare what matters, not the wording: the same facts, the same decision, the same actions (a ticket opened, a handover). Answers are free text and ids differ on every run, so an exact match fails everything. When the check is unsure, leave the result undecided.
 - **Never decide an open item.** AgentLens refuses it: passing an open item lets an owner approve it, which makes that answer the expected one for every later evaluation. Give it a hint score instead.
 - **The harness's decision is final.** Nobody can overturn it in AgentLens; a wrong one is answered with a new evaluation.
 - `result.score()` scores the result's trace with `source: 'harness'`. `result.fail(error)` records an item that could not run: it counts as failed, with the error shown. An item the harness never reported fails the same way when the run finishes.
-- **Report at least every 15 minutes.** A run that reports nothing for longer fails, and later reports are refused. Reports are batched and retried by the client, so a long item only needs its result created before it runs.
+- **Report at least every 15 minutes.** Every result created, decided or failed is sent within seconds and counts as a report; scores do not. A run fails when nothing is reported for 15 minutes, for example one item that runs longer than that with no other result reported in the meantime, and later reports are refused.
 
 Then set the harness's address on the agent: an owner sets it in the agent's settings with **Edit harness**, or `save_agent` sets `harnessWebhookUrl` over MCP once the user confirms (`null` removes it).
 
