@@ -6,7 +6,7 @@ A review is one expert's feedback on one trace. The expert comments right on the
 | --- | --- |
 | `OPEN` | Waiting on its assignee, or on an owner to assign it |
 | `REVIEWED` | Graded, waiting for an owner to decide |
-| `CLOSED` | Decided: **Approved** (a good answer, added to the dataset), **Needs improvement** (a wrong answer, added to the dataset to fix) or **Drop** (nothing to keep) |
+| `CLOSED` | Decided: **Approved** (a good answer, added to the Dataset as an Approved item), **Needs improvement** (a wrong answer, added to the Dataset as an Open item to fix) or **Drop** (nothing to keep) |
 
 The MCP server reads reviews. Assigning, resolving, deciding and closing stay with people in AgentLens.
 
@@ -23,3 +23,5 @@ The MCP server reads reviews. Assigning, resolving, deciding and closing stay wi
    A comment asking for a different policy or tone is the user's call, not a bug: list it separately.
 5. **Fix it.** Change the prompt, tool or code at the step where the problem starts. Run the agent again on the input of each trace involved, and compare its answers with what the reviewers asked for.
 6. **Report** each problem with the trace and review ids it covers, so the reviewers can check the new answers and close their reviews.
+
+To prove a fix on the cases the reviews turned into Dataset items, and to see that it broke none of the approved ones, run an evaluation: [Evaluations](evaluations.md).

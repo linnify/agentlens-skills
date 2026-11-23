@@ -9,7 +9,7 @@ Everything the skill states comes from two repositories, and must stay true to w
 | Repository | What the skill takes from it |
 | --- | --- |
 | [linnify/agentlens-sdk](https://github.com/linnify/agentlens-sdk) | Package names, options, environment variables, span attributes, log messages, code samples |
-| [linnify/agentlens](https://github.com/linnify/agentlens) | The MCP server's URL and tools, the ingestion API, screen and setting names, review statuses and decisions, how scores are shown |
+| [linnify/agentlens](https://github.com/linnify/agentlens) | The MCP server's URL, sign-in, tools and the role each needs, the ingestion and evaluation run APIs, screen and setting names, review statuses and decisions, Dataset item and evaluation statuses, how scores are shown |
 
 When a release of either renames, adds or removes something the skill mentions, update the skill.
 
@@ -18,7 +18,7 @@ When a release of either renames, adds or removes something the skill mentions, 
 - A new kind of task gets its own section in `references/`, with one line in `SKILL.md`'s **Sections** list. Anything else extends an existing section.
 - Write for an agent in the middle of the task: what to do, the values to use, how to check it worked. Leave out what it can read from the code in front of it.
 - Keep code samples minimal and copy them from the SDK's released READMEs and source.
-- `allowed-tools` lists only tools that read. Never `save_agent`, or anything that writes or deletes.
+- `allowed-tools` lists only tools that read. Never `save_agent`, `start_evaluation`, `decide_evaluation_result`, or anything else that writes or deletes: the user approves each of those calls.
 
 ## Releasing
 
