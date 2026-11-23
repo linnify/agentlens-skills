@@ -73,13 +73,13 @@ Traces of experiments and evaluations stay out of the normal trace lists; they a
 | Variable | |
 | --- | --- |
 | `AGENTLENS_API_KEY` | Required. Without it the SDK sends nothing and logs a warning. |
-| `AGENTLENS_BASE_URL` | The AgentLens web app's address. Defaults to `https://agentlens.linnify.com`; set it only for another AgentLens, such as a local one (`http://localhost:3000`). The SDK adds `/api/v1` itself, so never end it in `/api` or `/v1`. The old api address, `https://api.agentlens.linnify.com`, no longer accepts traces: remove it wherever a project still sets it. |
+| `AGENTLENS_BASE_URL` | The AgentLens web app's address. Defaults to `https://agentlens.linnify.com`; set it only for another AgentLens, such as a local one (`http://localhost:3000`). The SDK adds `/api/v1` itself, so never end it in `/api` or `/v1`. The old api address, `https://api.agentlens.linnify.com`, answers only for releases before 0.9.0: remove it wherever a project still sets it. |
 | `AGENTLENS_ENABLED` | `false`, `0`, `no` or `off` turns the SDK off without a warning: tests, CI, local runs. |
 | `AGENTLENS_ENVIRONMENT` | The traces' environment, read by the Mastra, LangChain and pi packages. |
 
 ## SDK rules
 
-- Install the latest release and keep every `@linnify/agentlens-*` package on the same version: they are released together. Releases before 0.9.0 send to the retired api address and reach nothing: upgrade a project that pins one.
+- Install the latest release and keep every `@linnify/agentlens-*` package on the same version: they are released together. Releases before 0.9.0 still deliver traces and scores, through the old api address, but have no experiments or evaluations: upgrade a project that pins one.
 - For an option this skill doesn't show, read the package's README for its current release: `https://unpkg.com/@linnify/agentlens-<package>/README.md`.
 - A change is done when its trace or score shows up in AgentLens, not when it compiles.
 
