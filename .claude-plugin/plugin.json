@@ -1,7 +1,7 @@
 {
   "name": "agentlens",
   "description": "Skills for integrating AgentLens, the platform where domain experts review AI agent traces: send traces and scores with the AgentLens SDKs, improve the agent from reviewer feedback, and check each change with experiments and evaluations.",
-  "version": "0.2.1",
+  "version": "0.2.0",
   "author": {
     "name": "Linnify",
     "url": "https://linnify.com"
