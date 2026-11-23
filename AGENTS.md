@@ -9,7 +9,7 @@ Everything the skill states comes from two repositories, and must stay true to w
 | Repository | What the skill takes from it |
 | --- | --- |
 | [linnify/agentlens-sdk](https://github.com/linnify/agentlens-sdk) | Package names, options, environment variables, span attributes, log messages, code samples |
-| [linnify/linnify-agentlens](https://github.com/linnify/linnify-agentlens) | The MCP server's URL, sign-in, tools and the role each needs, the ingestion and evaluation run APIs, screen and setting names, review statuses and decisions, Dataset item and evaluation statuses, how scores are shown |
+| [linnify/agentlens](https://github.com/linnify/agentlens) | The MCP server's URL, sign-in, tools and the role each needs, the ingestion and evaluation run APIs, screen and setting names, review statuses and decisions, Dataset item and evaluation statuses, how scores are shown |
 
 When a release of either renames, adds or removes something the skill mentions, update the skill.
 
